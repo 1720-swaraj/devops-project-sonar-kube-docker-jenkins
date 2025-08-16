@@ -34,34 +34,35 @@ pipeline {
         stage('SonarQube') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
-                sh " $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=Campground -Dsonar.projectName=Campground -Dsonar.login=$SONAR_TOKEN"
+                    sh " $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=Campground -Dsonar.projectName=Campground -Dsonar.login=$SONAR_TOKEN"
+                }
             }
-        }
-        stage('Docker Build & tag') {
-            steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
-                        sh 'docker build -t swaraj9/camp:latest .'
+            stage('Docker Build & tag') {
+                steps {
+                    script {
+                        withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                            sh 'docker build -t swaraj9/camp:latest .'
+                        }
                     }
                 }
             }
-        }
-        stage('Trivy Image Scan') {
-            steps {
-                sh 'trivy image --format table -o fs-report.html swaraj9/camp:latest'
-            }
-        }
-        stage('Docker Image Push') {
-            steps {
-                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
-                    sh 'docker push swaraj9/camp:latest'
+            stage('Trivy Image Scan') {
+                steps {
+                    sh 'trivy image --format table -o fs-report.html swaraj9/camp:latest'
                 }
             }
-        }
-        stage('Docker Deploy to Dev') {
-            steps {
-                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
-                    sh 'docker run -d -p 3000:3000 swaraj9/camp:latest'
+            stage('Docker Image Push') {
+                steps {
+                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                        sh 'docker push swaraj9/camp:latest'
+                    }
+                }
+            }
+            stage('Docker Deploy to Dev') {
+                steps {
+                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                        sh 'docker run -d -p 3000:3000 swaraj9/camp:latest'
+                    }
                 }
             }
         }

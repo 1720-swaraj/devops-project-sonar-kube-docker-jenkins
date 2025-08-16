@@ -35,7 +35,7 @@ pipeline{
         stage('Docker Build & tag'){
             steps{
                 script{
-                    withDockerRegistry( credentialsId: 'docker-cred', toolName: 'docker'){
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker'){
                     sh "docker build -t swaraj9/camp:latest ."
                     }
                 }
@@ -50,7 +50,7 @@ pipeline{
         }
         stage('Docker Image Push'){
             steps{
-                withDockerRegistry( credentialsId: 'docker-cred', toolName: 'docker'){
+                withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker'){
                     sh "docker push swaraj9/camp:latest"
                     }
                 
@@ -58,7 +58,7 @@ pipeline{
         }
         stage('Docker Deploy to Dev'){
             steps{
-                withDockerRegistry( credentialsId: 'docker-cred', toolName: 'docker'){
+                withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker'){
                     sh "docker run -d -p 3000:3000 swaraj9/camp:latest"
                     }
                 

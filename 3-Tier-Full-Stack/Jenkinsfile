@@ -1,0 +1,68 @@
+pipeline{
+    agent any
+    tools{
+        nodejs 'nodejs'
+    }
+    environment{
+        SCANNER_HOME= tool 'sonar-qube'
+    }
+    stages{
+        stage('git checkout'){
+            steps{
+                checkout scm
+            }
+        }
+        stage('Install Dependencies'){
+            steps{
+                sh "npm install"
+            }
+        }
+        stage('Unit tests'){
+            steps{
+                sh "npm test"
+            }
+        }
+        stage('Trivy Fs Scan'){
+            steps{
+                sh "trivy fs --format table -o fs-report.html ."
+            }
+        }
+        stage('SonarQube'){
+            steps{
+                sh " $SCANNER_HOME/bin/sonar-qube -Dsonar.projectKey=Campground -Dsonar.projectName=Campground"
+            }
+        }
+        stage('Docker Build & tag'){
+            steps{
+                script{
+                    withDockerRegistry( credentialsId: 'docker-cred', toolName: 'docker'){
+                    sh "docker build -t swaraj9/camp:latest ."
+                    }
+                }
+                
+            }
+        }
+        stage('Trivy Image Scan'){
+            steps{
+                sh "trivy image --format table -o fs-report.html swaraj9/camp:latest"
+                
+            }
+        }
+        stage('Docker Image Push'){
+            steps{
+                withDockerRegistry( credentialsId: 'docker-cred', toolName: 'docker'){
+                    sh "docker push swaraj9/camp:latest"
+                    }
+                
+            }
+        }
+        stage('Docker Deploy to Dev'){
+            steps{
+                withDockerRegistry( credentialsId: 'docker-cred', toolName: 'docker'){
+                    sh "docker run -d -p 3000:3000 swaraj9/camp:latest"
+                    }
+                
+            }
+        }
+    }
+}

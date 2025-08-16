@@ -1,67 +1,67 @@
-pipeline{
+pipeline {
     agent any
-    tools{
+    tools {
         nodejs 'nodejs'
     }
-    environment{
-        SCANNER_HOME= tool 'sonar-qube'
+    environment {
+        SCANNER_HOME = tool 'sonar-qube'
     }
-    stages{
-        stage('git checkout'){
-            steps{
+    stages {
+        stage('git checkout') {
+            steps {
                 checkout scm
             }
         }
-        stage('Install Dependencies'){
-            steps{
-                sh "npm install"
+        stage('Install Dependencies') {
+            steps {
+                dir('3-Tier-Full-Stack') {
+                    sh 'npm install'
+                }
             }
         }
-        stage('Unit tests'){
-            steps{
-                sh "npm test"
+        stage('Unit tests') {
+            steps {
+                dir('3-Tier-Full-Stack') {
+                    sh 'npm test'
+                }
             }
         }
-        stage('Trivy Fs Scan'){
-            steps{
-                sh "trivy fs --format table -o fs-report.html ."
+        stage('Trivy Fs Scan') {
+            steps {
+                sh 'trivy fs --format table -o fs-report.html .'
             }
         }
-        stage('SonarQube'){
-            steps{
+        stage('SonarQube') {
+            steps {
                 sh " $SCANNER_HOME/bin/sonar-qube -Dsonar.projectKey=Campground -Dsonar.projectName=Campground"
             }
         }
-        stage('Docker Build & tag'){
-            steps{
-                script{
-                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9'){
-                    sh "docker build -t swaraj9/camp:latest ."
+        stage('Docker Build & tag') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                        sh 'docker build -t swaraj9/camp:latest .'
                     }
                 }
-                
             }
         }
-        stage('Trivy Image Scan'){
-            steps{
-                sh "trivy image --format table -o fs-report.html swaraj9/camp:latest"
-                
+        stage('Trivy Image Scan') {
+            steps {
+                sh 'trivy image --format table -o fs-report.html swaraj9/camp:latest'
             }
         }
-        stage('Docker Image Push'){
-            steps{
-                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9'){
-                    sh "docker push swaraj9/camp:latest"
-                    }
-                
+        stage('Docker Image Push') {
+            steps {
+                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                    sh 'docker push swaraj9/camp:latest'
+                }
             }
         }
-        stage('Docker Deploy to Dev'){
-            steps{
-                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9'){
-                    sh "docker run -d -p 3000:3000 swaraj9/camp:latest"
-                    }
-                
+        stage('Docker Deploy to Dev') {
+            steps {
+                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                    sh 'docker run -d -p 3000:3000 swaraj9/camp:latest'
+                }
             }
         }
     }

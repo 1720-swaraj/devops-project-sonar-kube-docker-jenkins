@@ -41,7 +41,7 @@ pipeline {
             stage('Docker Build & tag') {
                 steps {
                     script {
-                        withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                        withDockerRegistry(credentialsId: 'docker-cred') {
                             sh 'docker build -t swaraj9/camp:latest .'
                         }
                     }
@@ -54,14 +54,14 @@ pipeline {
             }
             stage('Docker Image Push') {
                 steps {
-                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
                         sh 'docker push swaraj9/camp:latest'
                     }
                 }
             }
             stage('Docker Deploy to Dev') {
                 steps {
-                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://hub.docker.com/repositories/swaraj9') {
+                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
                         sh 'docker run -d -p 3000:3000 swaraj9/camp:latest'
                     }
                 }

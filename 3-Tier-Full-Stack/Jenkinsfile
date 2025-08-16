@@ -40,9 +40,11 @@ pipeline {
         }
             stage('Docker Build & tag') {
                 steps {
-                    script {
+                    dir('3-Tier-Full-Stack') {
+                        script {
                         withDockerRegistry(credentialsId: 'docker-cred') {
                             sh 'docker build -t swaraj9/camp:latest .'
+                        }
                         }
                     }
                 }

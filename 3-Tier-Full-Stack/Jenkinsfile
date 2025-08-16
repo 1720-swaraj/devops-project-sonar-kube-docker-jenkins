@@ -33,7 +33,7 @@ pipeline {
         }
         stage('SonarQube') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-cred', variable: 'sonar-qube-cred')]) {
+                withCredentials([string(credentialsId: 'sonar-cred', variable: 'sonar-cred')]) {
                     sh " $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=Campground -Dsonar.projectName=Campground"
                 }
             }

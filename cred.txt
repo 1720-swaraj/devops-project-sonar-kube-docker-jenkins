@@ -1,0 +1,66 @@
+mongodb+srv://swaraj:<db_password>@devopsswaraj.p0ps8pb.mongodb.net/
+
+
+mongodb+srv://swaraj:swaraj@devopsswaraj.p0ps8pb.mongodb.net/?retryWrites=true&w=majority&appName=devopsswaraj
+
+Cloud name	
+	dsmzlcpe1
+API key	
+	171933996195439
+API secret	
+	srQ0FwXj5ot_ZWaUmcACj7Se2iM
+
+API environment variable	
+	CLOUDINARY_URL=cloudinary://171933996195439:srQ0FwXj5ot_ZWaUmcACj7Se2iM@dsmzlcpe1
+
+
+CLOUDINARY_CLOUD_NAME=dsmzlcpe1
+CLOUDINARY_KEY=171933996195439
+CLOUDINARY_SECRET=srQ0FwXj5ot_ZWaUmcACj7Se2iM
+MAPBOX_TOKEN=sk.eyJ1Ijoic3dhcmFqZGV2b3BzIiwiYSI6ImNtZWUwcDhvcDA1eGoyaXNicWpidW55a2MifQ.VUv1ZugMZBD8jq-9Wvt8zw
+DB_URL="mongodb+srv://swaraj:swaraj@devopsswaraj.p0ps8pb.mongodb.net/?retryWrites=true&w=majority&appName=devopsswaraj"
+SECRET=devopsswaraj
+
+
+import { v2 as cloudinary } from 'cloudinary';
+
+(async function() {
+
+    // Configuration
+    cloudinary.config({ 
+        cloud_name: 'dsmzlcpe1', 
+        api_key: '171933996195439', 
+        api_secret: '<your_api_secret>' // Click 'View API Keys' above to copy your API secret
+    });
+    
+    // Upload an image
+     const uploadResult = await cloudinary.uploader
+       .upload(
+           'https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg', {
+               public_id: 'shoes',
+           }
+       )
+       .catch((error) => {
+           console.log(error);
+       });
+    
+    console.log(uploadResult);
+    
+    // Optimize delivery by resizing and applying auto-format and auto-quality
+    const optimizeUrl = cloudinary.url('shoes', {
+        fetch_format: 'auto',
+        quality: 'auto'
+    });
+    
+    console.log(optimizeUrl);
+    
+    // Transform the image: auto-crop to square aspect_ratio
+    const autoCropUrl = cloudinary.url('shoes', {
+        crop: 'auto',
+        gravity: 'auto',
+        width: 500,
+        height: 500,
+    });
+    
+    console.log(autoCropUrl);    
+})();

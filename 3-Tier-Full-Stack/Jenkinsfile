@@ -4,7 +4,7 @@ pipeline {
         nodejs 'nodejs'
     }
     environment {
-        SCANNER_HOME = tool 'sonar-qube'
+        SCANNER_HOME = tool 'sonar-scanner'
     }
     stages {
         stage('git checkout') {

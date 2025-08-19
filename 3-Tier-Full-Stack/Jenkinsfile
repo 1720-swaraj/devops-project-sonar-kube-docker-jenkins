@@ -70,9 +70,11 @@ pipeline {
             // }
             stage('K8-cluster') {
                 steps {
+                    dir('3-Tier-Full-Stack') {
                     withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'MY-EKS-1', contextName: '', credentialsId: 'jenkins', namespace: 'webapps', serverUrl: 'https://43F72234233079FDEB1AE954592EBE7E.gr7.us-east-1.eks.amazonaws.com']]) {
-                    sh 'kubectl apply -f dss.yml'
-                    sleep 60
+                        sh 'kubectl apply -f dss.yml'
+                        sleep 60
+                    }
                     }
                 }
             }

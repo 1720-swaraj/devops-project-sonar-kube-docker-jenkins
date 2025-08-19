@@ -43,7 +43,7 @@ pipeline {
                     dir('3-Tier-Full-Stack') {
                         script {
                         withDockerRegistry(credentialsId: 'docker-cred') {
-                            sh 'docker build -t swaraj9/camp:latest .'
+                            sh 'docker build -t swaraj9/campa:latest .'
                         }
                         }
                     }
@@ -51,21 +51,37 @@ pipeline {
             }
             stage('Trivy Image Scan') {
                 steps {
-                    sh 'trivy image --format table -o fs-report.html swaraj9/camp:latest'
+                    sh 'trivy image --format table -o fs-report.html swaraj9/campa:latest'
                 }
             }
             stage('Docker Image Push') {
                 steps {
                     withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
-                        sh 'docker push swaraj9/camp:latest'
+                        sh 'docker push swaraj9/campa:latest'
                     }
                 }
             }
-            stage('Docker Deploy to Dev') {
+            // stage('Docker Deploy to Dev') {
+            //     steps {
+            //         withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
+            //             sh 'docker run -d -p 3000:3000 swaraj9/camp:latest'
+            //         }
+            //     }
+            // }
+            stage('K8-cluster') {
                 steps {
-                    withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
-                        sh 'docker run -d -p 3000:3000 swaraj9/camp:latest'
+                    withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'MY-EKS-1', contextName: '', credentialsId: 'jenkins', namespace: 'webapps', serverUrl: 'https://43F72234233079FDEB1AE954592EBE7E.gr7.us-east-1.eks.amazonaws.com']]) {
+                    sh 'kubectl apply -f dss.yml'
+                    sleep 60
                     }
+                }
+            }
+            stage('verify the deployment') {
+                steps {
+                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'MY-EKS-1', contextName: '', credentialsId: 'jenkins', namespace: 'webapps', serverUrl: 'https://43F72234233079FDEB1AE954592EBE7E.gr7.us-east-1.eks.amazonaws.com']]) {
+                    sh 'kubectl get pods -n webapps'
+                    sh 'kubectl get svc -n webapps'
+                }
                 }
             }
     }
